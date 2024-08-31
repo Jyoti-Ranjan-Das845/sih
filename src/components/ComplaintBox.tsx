@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import generateTextFromImage from '../api/route';
+import queryGeminiWithImage from '../api/route';
 
 const ComplaintBox = () => {
   const [mobileNumber, setMobileNumber] = useState("");
@@ -84,6 +86,50 @@ const ComplaintBox = () => {
         fileUrl,  // URL of the uploaded file
         createdAt: new Date()
       });
+
+      // console.log(queryGeminiWithImage("AIzaSyAtC1vtTrW4hP2Gvov_3tKf3dJtOCAPh1k",fileUrl,"You have given a image..Your task is to analyze that image and generate a complaint text out of that"))
+  // Inside handleSubmit function
+
+//   try {
+//     const response = await fetch('http://127.0.0.1:5000/generate-complaint', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//             filePath: fileUrl,
+//             prompt: prompt,
+//         }),
+//     });
+
+//     // Check if the response is okay
+//     if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+
+//     // Parse the JSON response and enforce the response type
+//     const data: any = await response.json();
+
+//     // Handle the response data
+//     console.log('Response data:', data);
+
+//     // For example, you might display the generated complaint text
+//     if (data.status === "success") {
+//         console.log("Complaint Text:", data.complaintText);
+//         // Update the UI with the generated complaint text
+//     } else {
+//         console.error("Error:", data.message);
+//         // Handle error in the UI
+//     }
+// } catch (error) {
+//     console.error('Error:', error);
+//     // Handle general error in the UI
+// }
+
+
+  
+
+
 
       setIsSuccess(true);
       setNotification("Complaint submitted successfully!"); // Show success notification
