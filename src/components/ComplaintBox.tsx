@@ -8,8 +8,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import generateTextFromImage from '../api/route';
-import queryGeminiWithImage from '../api/route';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// import generateTextFromImage from '../api/route';
+// import queryGeminiWithImage from '../api/route';
+const genAI = new GoogleGenerativeAI("AIzaSyAtC1vtTrW4hP2Gvov_3tKf3dJtOCAPh1k");
+
+async function generateTextFromImage(file: File , promptStr:string): Promise<string> {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = ` I want to create a enhanced text from user query and image 
+               userquery: ${promptStr}`;
+    const imageBuffer = await file.arrayBuffer();
+    const imageBase64 = Buffer.from(imageBuffer).toString("base64");
+
+    const image = {
+      inlineData: {
+        data: imageBase64,
+        mimeType: file.type,
+      },
+    };
+
+    const result = await model.generateContent([prompt, image]);
+    const generatedText = await result.response.text();
+
+    return generatedText;
+  } catch (error) {
+    console.error("Error generating text from image:", error);
+    throw new Error("Failed to generate text from the image.");
+  }
+}
+
 
 const ComplaintBox = () => {
   const [mobileNumber, setMobileNumber] = useState("");
@@ -68,14 +98,15 @@ const ComplaintBox = () => {
     try {
       let fileUrl = "";
       const selectedFile = fileInput.current?.files?.[0];
-
       if (selectedFile) {
-        const fileRef = ref(storage, `uploads/${selectedFile.name}`);
+        const fileRef = ref(storage,`uploads/${selectedFile.name}`);
         await uploadBytes(fileRef, selectedFile); // Upload file to Firebase Storage
         fileUrl = await getDownloadURL(fileRef);  // Get file URL after upload
       }
+      else if (!selectedFile) {
+        throw new Error("No file selected");
+      }
 
-      // Save all data to Firestore
       await addDoc(collection(db, "complaints"), {
         userId: "someUserId", // Replace with actual user ID
         problemId: "someProblemId", // Replace with actual problem ID if needed
@@ -86,64 +117,71 @@ const ComplaintBox = () => {
         fileUrl,  // URL of the uploaded file
         createdAt: new Date()
       });
-
-      // console.log(queryGeminiWithImage("AIzaSyAtC1vtTrW4hP2Gvov_3tKf3dJtOCAPh1k",fileUrl,"You have given a image..Your task is to analyze that image and generate a complaint text out of that"))
-  // Inside handleSubmit function
-
-//   try {
-//     const response = await fetch('http://127.0.0.1:5000/generate-complaint', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({
-//             filePath: fileUrl,
-//             prompt: prompt,
-//         }),
-//     });
-
-//     // Check if the response is okay
-//     if (!response.ok) {
-//         throw new Error(`HTTP error! status: ${response.status}`);
-//     }
-
-//     // Parse the JSON response and enforce the response type
-//     const data: any = await response.json();
-
-//     // Handle the response data
-//     console.log('Response data:', data);
-
-//     // For example, you might display the generated complaint text
-//     if (data.status === "success") {
-//         console.log("Complaint Text:", data.complaintText);
-//         // Update the UI with the generated complaint text
-//     } else {
-//         console.error("Error:", data.message);
-//         // Handle error in the UI
-//     }
-// } catch (error) {
-//     console.error('Error:', error);
-//     // Handle general error in the UI
-// }
-
-
-  
-
-
-
       setIsSuccess(true);
       setNotification("Complaint submitted successfully!"); // Show success notification
+
+      const result = await generateTextFromImage(selectedFile, complaintText);
+
+     
+      const pnr = Math.floor(10000 + Math.random() * 90000);
+      await addDoc(collection(db, "department"), {
+        date:new Date(),
+        department:"General",
+        email:"user@exmple.com",
+        enhancedComplaint:result,
+        fileUrl,
+        phone: mobileNumber,
+        pnr:pnr.toString(),
+        problemId: "someProblemId",
+        severity: "High",
+        status: "pending",
+        userId: "someUserId"
+      });
+
+      
+
+      // const prompt = `user complaint is :{${userData.complaintText}},
+      //                 user provided image context is: {${gemini_Res}},
+      // `
+      // const result = await getHybridResults(prompt);
+      // console.log("Hybrid Results:", JSON.stringify(result, null, 2));
+    
+      
+    // if (result) {
+    //   console.log(result);
+    //   setIsSuccess(true);
+    //   setNotification("Department DB image working");
+    // } else {
+    //   throw new Error("Text generation failed.");
+    // }
+  
     } catch (error) {
       console.error("Error submitting complaint:", error);
       setIsSuccess(false);
-      setNotification("Error submitting complaint. Please try again."); // Show error notification
+      setNotification("Error submitting complaint. Please try again.");
+    }
+  };
+
+  const handleReset = () => {
+    setMobileNumber("");
+    setIsMobileValid(false);
+    setType("");
+    setComplaintText("");
+    setGrievanceDescription("");
+    setIncidentDate("");
+    setFileError("");
+    setNotification("");
+    setIsSuccess(false);
+
+    if (fileInput.current) {
+      fileInput.current.value = "";
     }
   };
 
   return (
     <div className="bg-white shadow-md p-6 rounded-md w-full max-w-lg mx-auto mt-8">
       <h2 className="text-xl font-bold mb-4">Grievance Detail</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} onReset={handleReset}>
         <div className="mb-4">
           <label className="block text-gray-700 mb-1">Mobile No.</label>
           <Input

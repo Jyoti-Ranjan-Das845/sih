@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc, deleteDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebaseConfig';
 import { useRouter } from 'next/navigation';
 
@@ -75,19 +75,28 @@ const AdminDashboard = () => {
           );
           const complaintsSnapshot = await getDocs(complaintsQuery);
 
-          const fetchedComplaints: Complaint[] = complaintsSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            userId: doc.data().userId,
-            problemId: doc.data().problemId,
-            phone: doc.data().phone,
-            pnr: doc.data().pnr,
-            enhancedComplaint: doc.data().enhancedComplaint,
-            severity: doc.data().severity,
-            date: doc.data().date,
-            email: doc.data().email,
-            fileUrl: doc.data().fileUrl,
-            department: doc.data().department,
-          }));
+          const fetchedComplaints: Complaint[] = complaintsSnapshot.docs.map((doc) => {
+            const data = doc.data();
+            let dateStr = "";
+            if (data.date instanceof Timestamp) {
+              dateStr = data.date.toDate().toLocaleString(); // Convert to string format
+            } else {
+              dateStr = data.date;
+            }
+            return {
+              id: doc.id,
+              userId: data.userId,
+              problemId: data.problemId,
+              phone: data.phone,
+              pnr: data.pnr,
+              enhancedComplaint: data.enhancedComplaint,
+              severity: data.severity,
+              date: dateStr,
+              email: data.email,
+              fileUrl: data.fileUrl,
+              department: data.department,
+            };
+          });
 
           setComplaints(fetchedComplaints);
         } catch (error) {
@@ -183,11 +192,18 @@ const AdminDashboard = () => {
                     <td className="border-b border-gray-300 py-2 px-4">{complaint.problemId}</td>
                     <td className="border-b border-gray-300 py-2 px-4">{complaint.pnr}</td>
                     <td
-                      className="border-b border-gray-300 py-2 px-4 text-blue-600 hover:underline cursor-pointer"
-                      onClick={() => handleComplaintClick(complaint)}
-                    >
-                      {complaint.enhancedComplaint}
-                    </td>
+  className="border-b border-gray-300 py-2 px-4 text-blue-600 hover:underline cursor-pointer"
+  onClick={() => handleComplaintClick(complaint)}
+>
+  {(() => {
+    const words = complaint.enhancedComplaint.split(' ');
+    if (words.length > 4) {
+      return `${words.slice(0, 4).join(' ')}...`;
+    }
+    return complaint.enhancedComplaint;
+  })()}
+</td>
+
                     <td className="border-b border-gray-300 py-2 px-4">{complaint.date}</td>
                     <td className="border-b border-gray-300 py-2 px-4">
                       <span

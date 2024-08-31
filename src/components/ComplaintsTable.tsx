@@ -94,11 +94,18 @@ const ComplaintsTable = ({ complaints, onComplaintClick }: { complaints: Complai
               <td className="border-b border-gray-300 py-2 px-4">{complaint.problemId}</td>
               <td className="border-b border-gray-300 py-2 px-4">{complaint.mobileNo}</td>
               <td className="border-b border-gray-300 py-2 px-4">
-                <span
-                  className="text-blue-600 hover:underline"
-                >
-                  {complaint.complaintText}
-                </span>
+              <span
+  className="text-blue-600 hover:underline"
+>
+  {(() => {
+    const words = complaint.complaintText.split(' ');
+    if (words.length > 4) {
+      return `${words.slice(0, 4).join(' ')}...`;
+    }
+    return complaint.complaintText;
+  })()}
+</span>
+
               </td>
               <td className="border-b border-gray-300 py-2 px-4">{complaint.date}</td>
               <td className="border-b border-gray-300 py-2 px-4">

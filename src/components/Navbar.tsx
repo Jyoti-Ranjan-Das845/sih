@@ -126,27 +126,35 @@ const Navbar: React.FC = () => {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Check if admin details are stored in local storage
     const adminDetails = localStorage.getItem('adminDetails');
     if (adminDetails) {
       console.log(adminDetails)
       setIsAdminLoggedIn(true);
     }
-  }, []); // Empty dependency array to run once on mount
+  }, []);
 
   const handleLogout = async () => {
     try {
       if (isAdminLoggedIn) {
-        // Remove admin details from local storage
         localStorage.removeItem('adminDetails');
         setIsAdminLoggedIn(false);
       } else {
         await signOut(auth);
       }
-      router.push('/home'); // Redirect to /home after logout
+      router.push('/home');
     } catch (error) {
       console.error("Error signing out:", error);
     }
+  };
+
+  const handleLoginClick = () => {
+    console.log('Opening Login Modal');
+    setIsLoginModalOpen(true);
+  };
+
+  const handleRegisterClick = () => {
+    console.log('Opening Register Modal');
+    setIsRegisterModalOpen(true);
   };
 
   return (
@@ -154,8 +162,8 @@ const Navbar: React.FC = () => {
       <div className="flex items-center">
         <FiMenu className="mr-2" />
         <img
-          src="/rail-logo.png" 
-          alt="IRCTC Logo"
+          src="/logo-rail-madad.png" 
+          alt="RAIL MADAD"
           width={50}
           height={50}
           className="mr-2"
@@ -173,18 +181,26 @@ const Navbar: React.FC = () => {
             <div className="flex items-center space-x-2">
               <span className="text-white">{user ? user.email : 'Admin'}</span>
             </div>
-            <Button onClick={handleLogout} variant="outline" className="text-white border-white hover:bg-white hover:text-blue-900">
-              Logout
-            </Button>
+            <Button
+  onClick={handleLogout}
+  variant="outline"
+  className="text-blue-900 bg-white border-blue-900 hover:bg-blue-900 hover:text-white hover:border-white"
+>
+  Logout
+</Button>
+
           </>
         ) : (
           <>
+           <Button
+  onClick={handleLoginClick}
+  variant="outline"
+  className="text-blue-900 bg-white border-blue-900 hover:bg-blue-900 hover:text-white hover:border-white"
+>
+  Login
+</Button>
+
             <Dialog open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-blue-900">
-                  Login
-                </Button>
-              </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Login</DialogTitle>
@@ -193,12 +209,15 @@ const Navbar: React.FC = () => {
               </DialogContent>
             </Dialog>
 
+            <Button
+  onClick={handleRegisterClick}
+  variant="outline"
+  className="text-blue-900 bg-white border-blue-900 hover:bg-blue-900 hover:text-white hover:border-white"
+>
+  Sign Up
+</Button>
+
             <Dialog open={isRegisterModalOpen} onOpenChange={setIsRegisterModalOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-blue-900">
-                  Sign Up
-                </Button>
-              </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Sign Up</DialogTitle>

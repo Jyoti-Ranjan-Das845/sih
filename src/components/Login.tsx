@@ -1,4 +1,3 @@
-// src/components/Login.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -29,28 +28,39 @@ const Login = () => {
   return (
     <form onSubmit={handleLogin} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email</label>
+        <label className="block text-sm font-medium text-gray-700">
+          Email
+        </label>
         <Input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="text-gray-900" // Ensure input text is visible
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Password</label>
+        <label className="block text-sm font-medium text-gray-700">
+          Password
+        </label>
         <Input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          className="text-gray-900" // Ensure input text is visible
         />
       </div>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500">{error}</p>} {/* Error text in red */}
 
-      <Button type="submit">Login</Button>
+      <Button
+        type="submit"
+        className="w-full bg-blue-600 text-white hover:bg-blue-700 hover:text-white"
+      >
+        Login
+      </Button>
     </form>
   );
 };
