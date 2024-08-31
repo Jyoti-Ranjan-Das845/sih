@@ -158,7 +158,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="flex items-center justify-between bg-blue-900 text-white p-4">
+    <nav className="flex items-center justify-between bg-blue-700 text-white p-4">
       <div className="flex items-center">
         <FiMenu className="mr-2" />
         <img
