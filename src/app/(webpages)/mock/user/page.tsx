@@ -107,7 +107,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useComplaint } from '@/lib/ComplaintContext';
-import { collection, query, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebaseConfig';
 
 interface Complaint {
@@ -178,7 +178,7 @@ const AdminDashboard = () => {
           name: adminData.name,
           email: adminData.email,
           phone: adminData.phone,
-          totalComplaintsHandled: fetchedComplaints.length,
+          totalComplaintsHandled: setComplaints.length,
           profileImage: adminData.profileImage,
         });
       }
